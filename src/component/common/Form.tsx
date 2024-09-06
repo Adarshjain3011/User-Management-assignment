@@ -10,17 +10,19 @@ interface UserProps {
   phone?: string;
   text: string;
   formType: string;
-  userHandler: (id: any, name: string, email: string, phone: string) => void;
+  userHandler: (name: string, email: string, phone: string, id?: any) => void;
 }
 
-const UserForm: React.FC<UserProps> = ({ name = "", email = "", phone = "", text, id, formType, userHandler }) => {
+const UserForm: React.FC<UserProps> = ({ name = "", email = "", phone = "", text, id = "", formType, userHandler }) => {
   const [userData, setUserData] = useState({ name, email, phone });
   const [isOpen, setIsOpen] = useState(false);
 
-  // Update userData state when the props change (if editing an existing user)
+  // Update userData state when the props change (if we're editing an existing user)
   useEffect(() => {
-    setUserData({ name, email, phone });
-  }, [name, email, phone]);
+    if (isOpen) {
+      setUserData({ name, email, phone }); // Set user data when modal opens
+    }
+  }, [name, email, phone, isOpen]);
 
   // Handle input changes
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,22 +32,28 @@ const UserForm: React.FC<UserProps> = ({ name = "", email = "", phone = "", text
 
   // Handle form submission
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
 
+    event.preventDefault();
     try {
       if (formType === "create") {
         // Call userHandler for creating a new user
-        userHandler(id || "", userData.name, userData.email, userData.phone);
+        userHandler(userData.name, userData.email, userData.phone);
       } else if (formType === "update") {
         // Call userHandler for updating an existing user
-        userHandler(id, userData.name, userData.email, userData.phone);
+        userHandler(userData.name, userData.email, userData.phone, id);
       }
 
       setIsOpen(false); // Close the form modal
-      setUserData({ name: '', email: '', phone: '' }); // Reset form data
+      setUserData({ name: '', email: '', phone: ''}); // Reset form data
     } catch (err) {
       console.error("Error submitting form:", err);
     }
+  };
+
+  // Close modal and reset form state
+  const closeModal = () => {
+    setIsOpen(false);
+    setUserData({ name: '', email: '', phone: '' }); // Reset form when closing
   };
 
   return (
@@ -62,9 +70,9 @@ const UserForm: React.FC<UserProps> = ({ name = "", email = "", phone = "", text
         <div className="fixed inset-0 mx-auto z-50 flex items-center justify-center bg-gray-500 bg-opacity-75 rounded-lg shadow-lg">
           <form onSubmit={handleSubmit} className="border flex flex-col justify-center items-center rounded-2xl bg-gray-400 p-8">
 
-            <div className=" relative w-full mb-4 flex justify-center items-center">
+            <div className="relative w-full mb-4 flex justify-center items-center">
               <h2 className="text-xl font-bold text-white">{text}</h2>
-              <div className='absolute w-fit -right-4 -top-5 cursor-pointer rounded-full p-2 bg-slate-600' onClick={() => setIsOpen(false)}>
+              <div className='absolute w-fit -right-4 -top-5 cursor-pointer rounded-full p-2 bg-slate-600' onClick={closeModal}>
                 <ImCross className='text-white' />
               </div>
             </div>

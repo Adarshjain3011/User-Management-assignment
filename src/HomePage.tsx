@@ -14,7 +14,7 @@ import Loader from './component/common/Loader';
 
 interface User {
 
-    id: number;
+    id: number | string;
     name: string;
     email: string;
     phone: string;
@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
 
     // Delete user handler function 
 
-    async function deleteUserHandler(id: number) {
+    async function deleteUserHandler(id:any) {
         try {
             await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`); // call for deleting the user 
 
@@ -43,11 +43,23 @@ const HomePage: React.FC = () => {
     }
 
     // Update user data
-    async function updateUserData({ id, name, email, phone }: User) {
+    const updateUserData = async ({ name, email, phone, id }:User) => {
         try {
 
+            console.log(name, email, phone,id)
 
-            const updatedUser = await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, {
+            let newid = typeof id === "string" ? parseInt(id) : id;
+
+            console.log("new id ",newid);
+
+            if (!newid) {
+
+                throw new Error("User ID is missing");
+            }
+
+            // userData.name, userData.email, userData.phone,id
+
+            const updatedUser = await axios.put(`https://jsonplaceholder.typicode.com/users/${newid}`, {
                 name,
                 email,
                 phone,
@@ -138,7 +150,7 @@ const HomePage: React.FC = () => {
                 <UserForm
                     text="Create New User"
                     formType="create"
-                    userHandler={(id, name, email, phone) => {
+                    userHandler={( name, email, phone) => {
                         createUserHandler({ name, email, phone });
                     }}
                 />
@@ -189,16 +201,14 @@ const HomePage: React.FC = () => {
                                         }} />
                                         <UserForm
                                             formType="update"
-                                            userHandler={(id, name, email, phone) => {
+                                            userHandler={(name, email, phone,id) => {
 
-                                                console.log("pika",user.id,user.name,user.email)
-
-                                                updateUserData({ id, name, email, phone });
+                                                updateUserData({ name, email, phone,id });
                                             }}
-                                            id={user.id}
                                             name={user.name}
                                             email={user.email}
                                             phone={user.phone}
+                                            id={user.id}
                                             text={`Edit User `}
                                         />
                                     </div>
