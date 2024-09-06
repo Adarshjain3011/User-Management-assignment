@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import InputBox from './InputBox';
 
@@ -17,7 +15,6 @@ interface UserProps {
 const UserForm: React.FC<UserProps> = ({ name = "", email = "", phone = "", text, id, formType, userHandler }) => {
   const [userData, setUserData] = useState({ name, email, phone });
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
 
   // Handle input changes
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {

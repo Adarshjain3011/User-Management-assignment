@@ -114,7 +114,7 @@ const HomePage: React.FC = () => {
                 <UserForm
                     text="Create New User"
                     formType="create"
-                    userHandler={(id, name, email, phone) => {
+                    userHandler={( name, email, phone) => {
                         createUserHandler({ name, email, phone });
                     }}
                 />
@@ -129,7 +129,7 @@ const HomePage: React.FC = () => {
 
                                 tableColumnData.map((columnData, index) => (
 
-                                    <TableColumn text={columnData}></TableColumn>
+                                    <TableColumn text={columnData} key={index}></TableColumn>
 
                                 ))
                             }
