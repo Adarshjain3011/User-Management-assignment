@@ -10,6 +10,8 @@ import { tableColumnData } from './utils/data';
 
 import TableData from './component/common/TableData';
 
+import Loader from './component/common/Loader';
+
 interface User {
 
     id: number;
@@ -21,6 +23,8 @@ interface User {
 const HomePage: React.FC = () => {
 
     const [users, setUsers] = useState<User[]>([]);
+
+    const [loading,setLoading] = useState(false);
 
     // Delete user handler function 
 
@@ -41,20 +45,32 @@ const HomePage: React.FC = () => {
     // Update user data
     async function updateUserData({ id, name, email, phone }: User) {
         try {
+
+
             const updatedUser = await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, {
                 name,
                 email,
                 phone,
 
-            }); // call for update the user 
+            }); 
+
+            console.log("update user ",updatedUser)
+            
+            // call for update the user 
+
+            const updatedData = updatedUser?.data || (updatedUser?.data)?.data;
+
+            console.log("update data ",updatedData)
 
             // now we have the update the updated user data in our users state 
 
             setUsers((prevUsers) =>
                 prevUsers.map(user =>
-                    user.id === id ? { ...user, ...updatedUser.data } : user
+                    user.id === id ? { ...user, ...updatedData  } : user
                 )
             );
+
+            console.log("update user handler ",users);
 
             toast.success("User updated successfully")
 
@@ -69,7 +85,9 @@ const HomePage: React.FC = () => {
     // Create a new user
 
     async function createUserHandler({ name, email, phone }: Partial<User>) {
+
         try {
+
             const newUser = await axios.post('https://jsonplaceholder.typicode.com/users', {
                 name,
                 email,
@@ -93,9 +111,15 @@ const HomePage: React.FC = () => {
         // Fetching users data  on page load
 
         const fetchUsers = async () => {
+
+            setLoading(true);
+            
             try {
                 const response = await axios.get('https://jsonplaceholder.typicode.com/users');
                 setUsers(response.data);
+
+                setLoading(false);
+            
 
             } catch (err: any) {
 
@@ -114,13 +138,21 @@ const HomePage: React.FC = () => {
                 <UserForm
                     text="Create New User"
                     formType="create"
-                    userHandler={( name, email, phone) => {
+                    userHandler={(id, name, email, phone) => {
                         createUserHandler({ name, email, phone });
                     }}
                 />
             </div>
 
             <div className="overflow-x-auto">
+
+                {
+                    loading && (
+                        <div className="flex justify-center items-center h-screen">
+                            <Loader />
+                        </div>
+                    )
+                }
                 <table className="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
                     <thead className="bg-blue-500">
                         <tr>
@@ -158,13 +190,16 @@ const HomePage: React.FC = () => {
                                         <UserForm
                                             formType="update"
                                             userHandler={(id, name, email, phone) => {
+
+                                                console.log("pika",user.id,user.name,user.email)
+
                                                 updateUserData({ id, name, email, phone });
                                             }}
                                             id={user.id}
                                             name={user.name}
                                             email={user.email}
                                             phone={user.phone}
-                                            text={`Edit`}
+                                            text={`Edit User `}
                                         />
                                     </div>
                                 </td>
@@ -172,6 +207,7 @@ const HomePage: React.FC = () => {
                         ))}
                     </tbody>
                 </table>
+                
             </div>
         </div>
     );
